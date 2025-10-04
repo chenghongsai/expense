@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    container_name: contoso-expense-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PGUSER:-contoso}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-contoso123}
+      POSTGRES_DB: ${PGDATABASE:-contoso_expense}
+    ports:
+      - "${PGPORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+volumes:
+  pgdata:
