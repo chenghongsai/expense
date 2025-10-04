@@ -1,8 +1,14 @@
 import {useState} from "react";
+import {login, register, Role} from "../lib/api";
 
 export default function LoginPage(){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [step, setStep] = useState<"login" | "register">("login");
+    const [error, setError] = useState<string | null>(null);
+
+    const [role, setRole] = useState<Role>("EMPLOYEE");
+    const [username, setUsername] = useState("");
     return (
         <div className="min-h-full grid place-items-center p-6">
             <div className="w-full max-w-md rounded-2xl bg-white shadow p-8">
