@@ -1,6 +1,6 @@
 import {useState} from "react";
-import {login, register, Role} from "../lib/api";
-
+import {login, register} from "../lib/api";
+import type {Role} from "../lib/api"
 export default function LoginPage(){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -16,7 +16,7 @@ export default function LoginPage(){
         if (step === "login"){
             try{
                 const res = await login(email, password);
-                alert("Login sucess");
+                console.log("Token", res.access_token)
             }catch (err: any){
                 if(err?.status === 403){
                     setError("You account is suspended");
@@ -27,15 +27,15 @@ export default function LoginPage(){
             }
         }else {
             if (!username.trim()){
-                setError("请填写用户名")；
+                setError("请填写用户名");
                 return;
             }
             try {
                 const  res = await register(email, password, role);
-                alert("注册并登录成功")；
+                console.log("Token", res.access_token)
             }catch (err: any){
                 if (err?.status === 400){
-                    setError("邮箱已存在，请返回登录并使用正确密码")；
+                    setError("邮箱已存在，请返回登录并使用正确密码");
                     setStep("login");
                 }else {
                     setError(err?.detail ?? "注册失败")
@@ -53,23 +53,23 @@ export default function LoginPage(){
                     使用公司邮箱登录；如不存在，我们会引导你注册。
                 </p>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>//开始做检查
+                <form className="space-y-4" onSubmit={handleSubmit}>{/* 开始做检查 */}
                     <div>
                         <label className="block text-sm text-gray-700 mb-1">Email</label>
-                        <input type="email" className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus: ring-indigo-500"
-                            placeholder="12345678@qq.com"
+                        <input type="email" className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="you@contoso.com"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value.trim)} required
+                            onChange={(e) => setEmail(e.target.value.trim())} required
                         />
                     </div>
 
                     <div>
-                        //独占一行，文字small(14px),margin-bottom: 0.25rem（即大约 4px）
+                        {/* 独占一行，文字small(14px),margin-bottom: 0.25rem（即大约 4px） */}
                         <label className="block text-sm text-gray-700 mb-1">Password</label>
                         <input
                             type="password"
                             //宽度占满父容器,px-3左右内边距，py-2上下内边距，focus:ring-2（box-shadow样式），样式颜色
-                            className="w-full rounded-lg border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -120,9 +120,21 @@ export default function LoginPage(){
                             </div>
                         </div>
                     )}
-                    <button type="submit" className="w-full rounded-lg bg-indigo-600 text-white py-2.5 font-medium hover:bgindigo-700 transition">
-                        Login / Register
+
+                    {error && <p className="text-sm text-red-600">{error}</p> }
+                    <button type="submit" className="w-full rounded-lg bg-indigo-600 text-white py-2.5 font-medium hover:bg-indigo-700 transition">
+                        {step === "login" ? "Login / Register" : "Create Account & Login"}
                     </button>
+
+                    {step === "register" && (
+                        <button
+                            type="button"
+                            onClick={() => {setStep("login");setError(null);}}
+                            className="w-full rounded-lg bg-gray-200 text-gray-800 py-2.5 font-medium hover:bg-gray-300 transition"
+                            >
+                            我一有账号，返回登录
+                        </button>
+                    )}
                 </form>
                 <p className="text-xs text-gray-50 mt-4"></p>
             </div>
