@@ -4,7 +4,10 @@ from passlib.context import CryptContext
 from .config import settings
 
 # 配置密码加密方式（bcrypt）
-_pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_pwd_ctx = CryptContext(
+    schemes=["pbkdf2_sha256", "bcrypt"],  # 同时支持两种算法
+    deprecated="auto"
+)
 
 # 对明文密码进行哈希
 def hash_password(p: str) -> str:

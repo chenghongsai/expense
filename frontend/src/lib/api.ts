@@ -1,6 +1,66 @@
+import { loadToken } from "./auth";
+const BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8000";
+
+function authHeaders() {
+  const t = loadToken();
+  if (!t) throw new Error("Not authenticated");
+  return { Authorization: `Bearer ${t}`, "Content-Type": "application/json" };
+}
+
 export type Role = "EMPLOYEE" | "EMPLOYER";
 
-const BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8000";
+export type Ticket = {
+  id: number;
+  owner_id: number;
+  spent_at: string;          // ISO string
+  amount: string | number;   // 后端可能返回字符串（Decimal），显示时转成 number
+  link?: string | null;
+  description?: string | null;
+  status: "PENDING" | "APPROVED" | "DENIED";
+};
+
+export async function getMyTickets(): Promise<Ticket[]> {
+  const res = await fetch(`${BASE}/tickets/me`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getAllTickets(): Promise<Ticket[]> {
+  const res = await fetch(`${BASE}/tickets`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function createTicket(input: {
+  spent_at: string;  // ISO
+  amount: number;    // number 即可，后端会转 Decimal
+  link?: string;
+  description?: string;
+}): Promise<Ticket> {
+  const res = await fetch(`${BASE}/tickets`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function approveTicket(id: number) {
+  const res = await fetch(`${BASE}/admin/tickets/${id}/approve`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
+
+export async function denyTicket(id: number) {
+  const res = await fetch(`${BASE}/admin/tickets/${id}/deny`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
 
 export async function login(email:string, password: string){
     const res = await fetch(`${BASE}/auth/login`,{
